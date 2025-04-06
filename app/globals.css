@@ -78,16 +78,13 @@
 }
 
 .cyber-button {
-  @apply relative overflow-hidden transition-all duration-300 bg-gradient-to-r from-cyber-pink to-cyber-purple hover:from-cyber-blue hover:to-cyber-purple text-white font-bold shadow-lg;
+  @apply text-white font-bold py-2 px-4 rounded transition-transform duration-200;
+  background: linear-gradient(45deg, #ff2a6d, #9d4edd, #05d9e8) !important;
 }
 
-.cyber-button::after {
-  content: "";
-  @apply absolute inset-0 bg-gradient-to-r from-cyber-blue to-cyber-purple opacity-0 transition-opacity duration-300;
-}
-
-.cyber-button:hover::after {
-  @apply opacity-100;
+.cyber-button:hover {
+  background: linear-gradient(45deg, #ff2a6d, #9d4edd, #05d9e8) !important;
+  transform: scale(1.05);
 }
 
 .cyber-card {

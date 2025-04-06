@@ -10,11 +10,128 @@ import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { CalendarIcon, ArrowLeft } from "lucide-react"
 import { format } from "date-fns"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
+import { Label } from "@/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 export default function BookingPage() {
+  const router = useRouter()
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [showAlert, setShowAlert] = useState(false)
+  const [timeLeft, setTimeLeft] = useState(300) // 5 minutes in seconds
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    numberOfTickets: 1,
+    transactionId: "",
+    passType: "normal"
+  })
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (timeLeft > 0) {
+      timer = setInterval(() => {
+        setTimeLeft((prevTime) => prevTime - 1);
+      }, 1000);
+    } else if (timeLeft === 0) {
+      toast.error("Payment time expired. Please refresh the page to try again.");
+    }
+    return () => clearInterval(timer);
+  }, [timeLeft]);
+
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+  };
+
+  const calculateTotal = () => {
+    const basePrice = formData.passType === "vip" ? 4000 : 3000;
+    return basePrice * formData.numberOfTickets;
+  }
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    if (name === "numberOfTickets") {
+      const numValue = parseInt(value);
+      if (numValue > 0 && numValue <= 5) {
+        setFormData(prev => ({ ...prev, [name]: numValue }));
+      }
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
+  };
+
+  const handlePassTypeChange = (value: string) => {
+    setFormData(prev => ({ ...prev, passType: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (timeLeft === 0) {
+      toast.error("Payment time expired. Please refresh the page to try again.");
+      return;
+    }
+
+    if (!formData.transactionId) {
+      toast.error("Please enter the transaction ID");
+      return;
+    }
+
+    setLoading(true)
+    setError('')
+
+    try {
+      console.log('Submitting form data:', formData);
+      
+      const response = await fetch('http://localhost:5000/api/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Error response:', errorText);
+        throw new Error(`Server responded with status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Response data:', data);
+
+      if (data.success) {
+        setShowAlert(true);
+      } else {
+        setError(data.message || 'Registration failed. Please try again.');
+        console.error('Registration error:', data);
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      setError(`An error occurred: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast.error(`Failed to connect to server. Please check if the server is running.`);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="flex min-h-screen flex-col bg-cyber-darkBg text-white">
       <Navbar />
@@ -33,98 +150,175 @@ export default function BookingPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form className="space-y-6">
-                <div className="grid gap-6 md:grid-cols-2">
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="space-y-4">
                   <div className="space-y-2">
-                    <label htmlFor="name" className="text-sm font-medium text-cyber-pink">
-                      Full Name
-                    </label>
-                    <Input id="name" placeholder="John Doe" required className="cyber-input" />
+                    <Label htmlFor="name" className="text-cyber-pink">Name</Label>
+                    <Input
+                      id="name"
+                      name="name"
+                      required
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      className="cyber-input text-white"
+                    />
                   </div>
+
                   <div className="space-y-2">
-                    <label htmlFor="email" className="text-sm font-medium text-cyber-pink">
-                      Email Address
-                    </label>
-                    <Input id="email" type="email" placeholder="john@example.com" required className="cyber-input" />
+                    <Label htmlFor="email" className="text-cyber-pink">Email</Label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      required
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      className="cyber-input text-white"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="phone" className="text-cyber-pink">Phone</Label>
+                    <Input
+                      id="phone"
+                      name="phone"
+                      required
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                      className="cyber-input text-white"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="numberOfTickets" className="text-cyber-pink">Number of Tickets (Max 5)</Label>
+                    <Input
+                      id="numberOfTickets"
+                      name="numberOfTickets"
+                      type="number"
+                      min="1"
+                      max="5"
+                      required
+                      value={formData.numberOfTickets}
+                      onChange={handleInputChange}
+                      className="cyber-input text-white"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-cyber-pink">Pass Type</Label>
+                    <RadioGroup 
+                      value={formData.passType} 
+                      onValueChange={handlePassTypeChange}
+                      className="flex flex-col space-y-2"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem 
+                          value="normal" 
+                          id="normal"
+                          className="border-cyber-pink text-cyber-pink data-[state=checked]:bg-cyber-pink"
+                        />
+                        <Label htmlFor="normal" className="text-white">Normal Pass - ₹3,000</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem 
+                          value="vip" 
+                          id="vip"
+                          className="border-cyber-pink text-cyber-pink data-[state=checked]:bg-cyber-pink"
+                        />
+                        <Label htmlFor="vip" className="text-white">VIP Pass - ₹4,000</Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+
+                  {/* QR Code and Timer Section */}
+                  <div className="mt-8 space-y-4 border border-cyber-pink rounded-lg p-6 bg-cyber-darkBg/50">
+                    <div className="flex flex-col items-center">
+                      <div className="text-center mb-4">
+                        <div className="text-xl font-bold cyber-gradient-text mb-2">
+                          Total Amount: ₹{calculateTotal().toLocaleString()}
+                        </div>
+                        <p className="text-cyber-blue">Scan QR to pay</p>
+                      </div>
+
+                      {/* QR Code */}
+                      <img 
+                        src="/upi-qr.png" 
+                        alt="UPI QR Code" 
+                        className="w-64 h-64 mb-4 bg-white p-2 rounded-lg"
+                      />
+                      
+                      {/* Timer */}
+                      <div className="w-full max-w-xs mb-2">
+                        <div className="flex justify-between text-sm text-cyber-blue mb-1">
+                          <span>Time Remaining:</span>
+                          <span className="font-bold">{formatTime(timeLeft)}</span>
+                        </div>
+                        <div className="w-full h-2 bg-cyber-mediumBg rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-cyber-pink transition-all duration-1000"
+                            style={{ width: `${(timeLeft / 300) * 100}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                      
+                      {/* UPI ID */}
+                      <div className="mt-4 text-center">
+                        <p className="text-cyber-blue text-sm">UPI ID: rithvikdofficial@okaxis</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="transactionId" className="text-cyber-pink">UPI Transaction ID</Label>
+                    <Input
+                      id="transactionId"
+                      name="transactionId"
+                      required
+                      value={formData.transactionId}
+                      onChange={handleInputChange}
+                      className="cyber-input text-white"
+                      placeholder="Enter your UPI transaction ID"
+                    />
                   </div>
                 </div>
 
-                <div className="grid gap-6 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <label htmlFor="phone" className="text-sm font-medium text-cyber-pink">
-                      Phone Number
-                    </label>
-                    <Input id="phone" placeholder="(123) 456-7890" required className="cyber-input" />
-                  </div>
-                  <div className="space-y-2">
-                    <label htmlFor="guests" className="text-sm font-medium text-cyber-pink">
-                      Number of Guests
-                    </label>
-                    <Input id="guests" type="number" min="1" placeholder="50" required className="cyber-input" />
-                  </div>
+                <div className="text-center">
+                  <p className="mb-4 text-sm text-cyber-blue">
+                    By clicking "Get Ticket" you agree to our <Link href="/terms" className="text-cyber-pink hover:underline">Terms and Conditions</Link>
+                  </p>
+                  <Button 
+                    type="submit" 
+                    className="w-full cyber-button"
+                    disabled={loading || timeLeft === 0}
+                  >
+                    {loading ? 'Processing...' : timeLeft === 0 ? 'Time Expired' : 'Get Ticket'}
+                  </Button>
+                  {error && <p className="mt-4 text-red-500">{error}</p>}
                 </div>
-
-                <div className="grid gap-6 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-cyber-pink">Event Date</label>
-                    <DatePickerDemo />
-                  </div>
-                  <div className="space-y-2">
-                    <label htmlFor="event-type" className="text-sm font-medium text-cyber-pink">
-                      Event Type
-                    </label>
-                    <Select>
-                      <SelectTrigger id="event-type" className="cyber-input">
-                        <SelectValue placeholder="Select event type" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-cyber-mediumBg border border-cyber-purple text-white">
-                        <SelectItem value="birthday" className="focus:bg-cyber-purple focus:text-white">
-                          Birthday Party
-                        </SelectItem>
-                        <SelectItem value="graduation" className="focus:bg-cyber-purple focus:text-white">
-                          Graduation Party
-                        </SelectItem>
-                        <SelectItem value="housewarming" className="focus:bg-cyber-purple focus:text-white">
-                          Housewarming
-                        </SelectItem>
-                        <SelectItem value="holiday" className="focus:bg-cyber-purple focus:text-white">
-                          Holiday Party
-                        </SelectItem>
-                        <SelectItem value="other" className="focus:bg-cyber-purple focus:text-white">
-                          Other
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label htmlFor="location" className="text-sm font-medium text-cyber-pink">
-                    Event Location
-                  </label>
-                  <Input id="location" placeholder="Full address" required className="cyber-input" />
-                </div>
-
-                <div className="space-y-2">
-                  <label htmlFor="details" className="text-sm font-medium text-cyber-pink">
-                    Additional Details
-                  </label>
-                  <Textarea
-                    id="details"
-                    placeholder="Tell us more about your event, special requirements, theme ideas, etc."
-                    rows={4}
-                    className="cyber-input"
-                  />
-                </div>
-
-                <Button type="submit" className="w-full cyber-button">
-                  Submit RSVP
-                </Button>
               </form>
             </CardContent>
           </Card>
         </div>
       </main>
+      <AlertDialog open={showAlert} onOpenChange={setShowAlert}>
+        <AlertDialogContent className="bg-cyber-mediumBg border-cyber-pink">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-cyber-pink">Registration Successful!</AlertDialogTitle>
+            <AlertDialogDescription className="text-white">
+              Thank you for registering! Our team will verify your payment and send your ticket via email.
+              Please check your email inbox (and spam folder) for further instructions.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction 
+              onClick={() => router.push('/')}
+              className="bg-cyber-pink hover:bg-cyber-pink/80"
+            >
+              Back to Home
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <Footer />
     </div>
   )
