@@ -69,7 +69,7 @@ export default function BookingPage() {
     const { name, value } = e.target;
     if (name === "numberOfTickets") {
       const numValue = parseInt(value);
-      if (numValue > 0 && numValue <= 5) {
+      if (numValue > 0) {
         setFormData(prev => ({ ...prev, [name]: numValue }));
       }
     } else {
@@ -190,13 +190,12 @@ export default function BookingPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="numberOfTickets" className="text-cyber-pink">Number of Tickets (Max 5)</Label>
+                    <Label htmlFor="numberOfTickets" className="text-cyber-pink">Number of Tickets</Label>
                     <Input
                       id="numberOfTickets"
                       name="numberOfTickets"
                       type="number"
                       min="1"
-                      max="5"
                       required
                       value={formData.numberOfTickets}
                       onChange={handleInputChange}
@@ -237,12 +236,12 @@ export default function BookingPage() {
                         <div className="text-xl font-bold cyber-gradient-text mb-2">
                           Total Amount: ₹{calculateTotal().toLocaleString()}
                         </div>
-                        <p className="text-cyber-blue">Scan QR to pay</p>
+                        <p className="text-cyber-blue">Make sure to pay the exact amount to this QR</p>
                       </div>
 
                       {/* QR Code */}
                       <img 
-                        src="/upi-qr.png" 
+                        src="/images/upi-qr.jpg" 
                         alt="UPI QR Code" 
                         className="w-64 h-64 mb-4 bg-white p-2 rounded-lg"
                       />
@@ -305,8 +304,7 @@ export default function BookingPage() {
           <AlertDialogHeader>
             <AlertDialogTitle className="text-cyber-pink">Registration Successful!</AlertDialogTitle>
             <AlertDialogDescription className="text-white">
-              Thank you for registering! Our team will verify your payment and send your ticket via email.
-              Please check your email inbox (and spam folder) for further instructions.
+              Thank you for registering! Please note that it might take 2-3 hours to verify your payment and send the ticket to your email. Make sure to check your spam folder.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

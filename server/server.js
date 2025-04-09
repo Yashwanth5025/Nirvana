@@ -157,19 +157,46 @@ app.get('/api/verify/:transactionId', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Ticket has already been used' });
     }
     
-    user.ticketVerified = true;
-    await user.save();
-    
     res.json({ 
       success: true, 
       user: {
         name: user.name,
         passType: user.passType,
-        transactionId: user.transactionId
+        transactionId: user.transactionId,
+        ticketVerified: user.ticketVerified
       }
     });
   } catch (error) {
     console.error('Verification error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Mark ticket as used
+app.post('/api/verify/:transactionId/mark-used', async (req, res) => {
+  try {
+    const user = await User.findOne({ transactionId: req.params.transactionId });
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'Invalid ticket' });
+    }
+    
+    if (!user.paymentVerified) {
+      return res.status(400).json({ success: false, message: 'Payment not verified' });
+    }
+
+    if (user.ticketVerified) {
+      return res.status(400).json({ success: false, message: 'Ticket has already been used' });
+    }
+    
+    user.ticketVerified = true;
+    await user.save();
+    
+    res.json({ 
+      success: true, 
+      message: 'Ticket marked as used successfully'
+    });
+  } catch (error) {
+    console.error('Error marking ticket as used:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 });

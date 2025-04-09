@@ -53,7 +53,7 @@ export default function Home() {
                 />
               </div>
               <CardHeader>
-                <CardTitle className="text-2xl cyber-gradient-text">House Party</CardTitle>
+                <CardTitle className="text-2xl cyber-gradient-text">Wings of Seraphim</CardTitle>
                 <CardDescription className="text-cyber-blue">
                   Join us for an epic night of music, dancing, and good vibes
                 </CardDescription>
@@ -61,16 +61,16 @@ export default function Home() {
               <CardContent>
                 <div className="space-y-4">
                   <div className="flex items-center text-cyber-blue">
+                    <Calendar className="mr-2 h-5 w-5" />
+                    <span>April 19th, 2025</span>
+                  </div>
+                  <div className="flex items-center text-cyber-blue">
+                    <MapPin className="mr-2 h-5 w-5" />
+                    <span>Shamshabad, Hyderabad</span>
+                  </div>
+                  <div className="flex items-center text-cyber-blue">
                     <Music className="mr-2 h-5 w-5" />
                     <span>Live DJ Performance</span>
-                  </div>
-                  <div className="flex items-center text-cyber-blue">
-                    <Users className="mr-2 h-5 w-5" />
-                    <span>Limited Entry</span>
-                  </div>
-                  <div className="flex items-center text-cyber-blue">
-                    <Building className="mr-2 h-5 w-5" />
-                    <span>Exclusive Venue</span>
                   </div>
                   <div className="pt-4">
                     <Link href="/book">

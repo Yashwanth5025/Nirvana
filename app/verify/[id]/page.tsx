@@ -10,6 +10,7 @@ export default function VerifyPage() {
   const params = useParams()
   const [status, setStatus] = useState<'loading' | 'valid' | 'invalid'>('loading')
   const [userData, setUserData] = useState<any>(null)
+  const [isMarkedUsed, setIsMarkedUsed] = useState(false)
 
   useEffect(() => {
     const verifyTicket = async () => {
@@ -20,6 +21,7 @@ export default function VerifyPage() {
         if (data.success) {
           setStatus('valid')
           setUserData(data.user)
+          setIsMarkedUsed(data.user.ticketVerified)
         } else {
           setStatus('invalid')
         }
@@ -31,6 +33,21 @@ export default function VerifyPage() {
 
     verifyTicket()
   }, [params.id])
+
+  const markTicketAsUsed = async () => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/verify/${params.id}/mark-used`, {
+        method: 'POST'
+      })
+      const data = await response.json()
+      
+      if (data.success) {
+        setIsMarkedUsed(true)
+      }
+    } catch (error) {
+      console.error('Error marking ticket as used:', error)
+    }
+  }
 
   return (
     <div className="flex min-h-screen flex-col bg-cyber-darkBg">
@@ -54,6 +71,21 @@ export default function VerifyPage() {
                     <p className="text-cyber-blue">Name: <span className="text-white">{userData.name}</span></p>
                     <p className="text-cyber-blue">Pass Type: <span className="text-white">{userData.passType}</span></p>
                     <p className="text-cyber-blue">Transaction ID: <span className="text-white">{userData.transactionId}</span></p>
+                    <div className="mt-4">
+                      {isMarkedUsed ? (
+                        <div className="flex items-center justify-center space-x-2 text-cyber-green">
+                          <CheckCircle2 className="h-5 w-5" />
+                          <span>Ticket Used</span>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={markTicketAsUsed}
+                          className="w-full py-2 px-4 bg-cyber-pink text-white rounded-lg hover:bg-cyber-pink/80 transition-colors"
+                        >
+                          Mark Ticket as Used
+                        </button>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
