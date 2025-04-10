@@ -1,23 +1,12 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "server/server.js",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "package.json",
-      "use": "@vercel/next"
-    }
-  ],
+  "buildCommand": "next build",
+  "outputDirectory": ".next",
+  "framework": "nextjs",
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "server/server.js"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/"
+      "dest": "/api/$1"
     }
   ]
 } 
