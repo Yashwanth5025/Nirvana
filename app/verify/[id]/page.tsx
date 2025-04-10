@@ -15,7 +15,7 @@ export default function VerifyPage() {
   useEffect(() => {
     const verifyTicket = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/verify/${params.id}`)
+        const response = await fetch(`/api/verify/${params.id}`)
         const data = await response.json()
         
         if (data.success) {
@@ -36,7 +36,7 @@ export default function VerifyPage() {
 
   const markTicketAsUsed = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/verify/${params.id}/mark-used`, {
+      const response = await fetch(`/api/verify/${params.id}/mark-used`, {
         method: 'POST'
       })
       const data = await response.json()

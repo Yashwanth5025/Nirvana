@@ -25,7 +25,7 @@ export default function AdminPage() {
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/users')
+      const response = await fetch('/api/users')
       const data = await response.json()
       setUsers(data)
     } catch (error) {
@@ -42,7 +42,7 @@ export default function AdminPage() {
 
   const handleVerifyPayment = async (userId: string) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/users/${userId}/verify-payment`, {
+      const response = await fetch(`/api/users/${userId}/verify-payment`, {
         method: 'POST'
       })
       
@@ -60,7 +60,7 @@ export default function AdminPage() {
 
   const handleDelete = async (userId: string) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/users/${userId}`, {
+      const response = await fetch(`/api/users?id=${userId}`, {
         method: 'DELETE'
       })
       
