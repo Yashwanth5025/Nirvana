@@ -42,6 +42,25 @@ export default function BookingPage() {
     passType: "normal"
   })
 
+  // Add UPI transaction ID validation
+  const isValidUpiTransactionId = (id: string) => {
+    // Accept both formats:
+    // 1. UPI-prefixed IDs (e.g., UPI123456789)
+    // 2. Standard transaction IDs (e.g., c8653c6fad71218b4e2b7753bec23e279e4a99ee8c60343635185da090eeb145)
+    const upiPattern = /^(UPI[a-zA-Z0-9]{9,12}|[a-f0-9]{40,64})$/i;
+    return upiPattern.test(id);
+  };
+
+  const isFormValid = () => {
+    return (
+      formData.name.trim() !== "" &&
+      formData.email.trim() !== "" &&
+      formData.phone.trim() !== "" &&
+      formData.numberOfTickets > 0 &&
+      isValidUpiTransactionId(formData.transactionId)
+    );
+  };
+
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (timeLeft > 0) {
@@ -268,7 +287,7 @@ export default function BookingPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="transactionId" className="text-cyber-pink">UPI Transaction ID</Label>
+                    <Label htmlFor="transactionId" className="text-cyber-pink">Transaction ID</Label>
                     <Input
                       id="transactionId"
                       name="transactionId"
@@ -278,6 +297,9 @@ export default function BookingPage() {
                       className="cyber-input text-white"
                       placeholder="Enter your UPI transaction ID"
                     />
+                    {formData.transactionId && !isValidUpiTransactionId(formData.transactionId) && (
+                      <p className="text-red-400 text-sm">Please enter a valid UPI transaction ID</p>
+                    )}
                   </div>
                 </div>
 
@@ -288,7 +310,7 @@ export default function BookingPage() {
                   <Button 
                     type="submit" 
                     className="w-full cyber-button"
-                    disabled={loading || timeLeft === 0}
+                    disabled={!isFormValid() || loading || timeLeft === 0}
                   >
                     {loading ? 'Processing...' : timeLeft === 0 ? 'Time Expired' : 'Get Ticket'}
                   </Button>

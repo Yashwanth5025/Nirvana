@@ -6,6 +6,8 @@ import Navbar from '@/components/navbar'
 import Footer from '@/components/footer'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
 
 interface User {
   _id: string
@@ -22,6 +24,20 @@ interface User {
 export default function AdminPage() {
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [password, setPassword] = useState("")
+  const [authError, setAuthError] = useState<string | null>(null)
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (password === "nirvanabackwards") {
+      setIsAuthenticated(true)
+      setAuthError(null)
+    } else {
+      setAuthError("Invalid password")
+    }
+  }
 
   const fetchUsers = async () => {
     try {
@@ -37,8 +53,10 @@ export default function AdminPage() {
   }
 
   useEffect(() => {
+    if (!isAuthenticated) return
+    
     fetchUsers()
-  }, [])
+  }, [isAuthenticated])
 
   const handleVerifyPayment = async (userId: string) => {
     try {
@@ -74,6 +92,35 @@ export default function AdminPage() {
       console.error('Error deleting user:', error)
       toast.error('Failed to delete user')
     }
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-black text-white p-8">
+        <div className="max-w-md mx-auto">
+          <h1 className="text-3xl font-bold mb-8 text-cyber-pink">Admin Access</h1>
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <Label htmlFor="password" className="text-cyber-pink">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="cyber-input text-white"
+                placeholder="Enter admin password"
+              />
+            </div>
+            {authError && (
+              <p className="text-red-400">{authError}</p>
+            )}
+            <Button type="submit" className="w-full bg-cyber-pink hover:bg-cyber-pink/80">
+              Login
+            </Button>
+          </form>
+        </div>
+      </div>
+    )
   }
 
   return (
