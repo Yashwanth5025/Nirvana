@@ -48,14 +48,17 @@ export default function Footer() {
             </ul>
           </div>
 
-          <div>
-            <h3 className="mb-4 text-xl font-bold text-cyber-pink">Contact Us</h3>
-            <address className="not-italic">
-              <p className="mb-2">123 Party Street</p>
-              <p className="mb-2">Los Angeles, CA 90001</p>
-              <p className="mb-2">Email: info@nirvanaevents.com</p>
-              <p>Phone: (123) 456-7890</p>
-            </address>
+          <div className="space-y-2">
+            <h3 className="text-lg font-semibold text-cyber-pink">Contact Us</h3>
+            <p className="text-cyber-blue">Email: info@nirvana.com</p>
+            <a 
+              href="https://www.instagram.com/nirvana.productionss/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-cyber-blue hover:text-cyber-pink transition-colors"
+            >
+              Instagram: @nirvana.productionss
+            </a>
           </div>
         </div>
 
