@@ -80,15 +80,15 @@ export default function BookingPage() {
   };
 
   const calculateTotal = () => {
-    const basePrice = formData.passType === "vip" ? 4000 : 3000;
+    const basePrice = formData.passType === "vip" ? 4000 : 2000;
     return basePrice * formData.numberOfTickets;
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     if (name === "numberOfTickets") {
-      const numValue = parseInt(value);
-      if (numValue > 0) {
+      const numValue = parseInt(value) || 0;
+      if (numValue >= 0) {
         setFormData(prev => ({ ...prev, [name]: numValue }));
       }
     } else {
@@ -176,10 +176,12 @@ export default function BookingPage() {
                     <Input
                       id="name"
                       name="name"
+                      type="text"
                       required
                       value={formData.name}
                       onChange={handleInputChange}
-                      className="cyber-input text-white"
+                      className="cyber-input text-white focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-cyber-pink"
+                      placeholder="Enter your name"
                     />
                   </div>
 
@@ -192,7 +194,8 @@ export default function BookingPage() {
                       required
                       value={formData.email}
                       onChange={handleInputChange}
-                      className="cyber-input text-white"
+                      className="cyber-input text-white focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-cyber-pink"
+                      placeholder="Enter your email"
                     />
                   </div>
 
@@ -201,10 +204,12 @@ export default function BookingPage() {
                     <Input
                       id="phone"
                       name="phone"
+                      type="tel"
                       required
                       value={formData.phone}
                       onChange={handleInputChange}
-                      className="cyber-input text-white"
+                      className="cyber-input text-white focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-cyber-pink"
+                      placeholder="Enter your phone number"
                     />
                   </div>
 
@@ -213,12 +218,13 @@ export default function BookingPage() {
                     <Input
                       id="numberOfTickets"
                       name="numberOfTickets"
-                      type="number"
-                      min="1"
-                      required
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
                       value={formData.numberOfTickets}
                       onChange={handleInputChange}
-                      className="cyber-input text-white"
+                      className="cyber-input text-white focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-cyber-pink"
+                      placeholder="Enter number of tickets"
                     />
                   </div>
 
@@ -233,15 +239,15 @@ export default function BookingPage() {
                         <RadioGroupItem 
                           value="normal" 
                           id="normal"
-                          className="border-cyber-pink text-cyber-pink data-[state=checked]:bg-cyber-pink"
+                          className="border-cyber-pink text-cyber-pink data-[state=checked]:bg-cyber-pink focus:ring-cyber-pink focus:ring-offset-cyber-darkBg"
                         />
-                        <Label htmlFor="normal" className="text-white">Normal Pass - ₹3,000</Label>
+                        <Label htmlFor="normal" className="text-white">Normal Pass - ₹2,000</Label>
                       </div>
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem 
                           value="vip" 
                           id="vip"
-                          className="border-cyber-pink text-cyber-pink data-[state=checked]:bg-cyber-pink"
+                          className="border-cyber-pink text-cyber-pink data-[state=checked]:bg-cyber-pink focus:ring-cyber-pink focus:ring-offset-cyber-darkBg"
                         />
                         <Label htmlFor="vip" className="text-white">VIP Pass - ₹4,000</Label>
                       </div>
@@ -291,11 +297,12 @@ export default function BookingPage() {
                     <Input
                       id="transactionId"
                       name="transactionId"
+                      type="text"
                       required
                       value={formData.transactionId}
                       onChange={handleInputChange}
-                      className="cyber-input text-white"
-                      placeholder="Enter your UPI transaction ID"
+                      className="cyber-input text-white focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-cyber-pink"
+                      placeholder="Enter UPI transaction ID"
                     />
                     {formData.transactionId && !isValidUpiTransactionId(formData.transactionId) && (
                       <p className="text-red-400 text-sm">Please enter a valid UPI transaction ID</p>
